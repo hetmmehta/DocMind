@@ -1,0 +1,18 @@
+# Python
+backend/venv/
+backend/__pycache__/
+backend/.pytest_cache/
+
+# Environment variables
+backend/.env
+
+# Uploaded files and local vector DB
+backend/uploads/
+backend/chroma_db/
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# System
+.DS_Store
