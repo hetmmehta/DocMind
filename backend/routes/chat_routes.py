@@ -22,8 +22,14 @@ def chat():
     if not isinstance(question, str) or not question.strip():
         return jsonify({"error": "Question is required"}), 400
 
+    # Optional: limit retrieval to a single uploaded document.
+    document = data.get("document") or None
+
+    if document is not None and not isinstance(document, str):
+        return jsonify({"error": "document must be a filename string"}), 400
+
     try:
-        result = ask_question(question.strip())
+        result = ask_question(question.strip(), document=document)
         return jsonify(result)
 
     except Exception as e:
