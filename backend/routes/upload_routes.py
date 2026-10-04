@@ -9,7 +9,8 @@ from werkzeug.utils import secure_filename
 from services.document_loader import load_pdf_text
 from services.chunking import chunk_pages
 from services.errors import QUOTA_ERROR_MESSAGE, is_quota_error
-from services.vector_store import add_chunks_to_vector_store
+from services.storage import remove_stored_files
+from services.vector_store import replace_document_chunks
 
 logger = logging.getLogger(__name__)
 
@@ -84,7 +85,7 @@ def upload_file():
             }), 422
 
         chunks = chunk_pages(pages, filename)
-        chunks_stored = add_chunks_to_vector_store(chunks)
+        chunks_stored = replace_document_chunks(filename, chunks)
 
     except PdfReadError:
         logger.warning("Could not parse uploaded PDF %s", filename, exc_info=True)
@@ -102,6 +103,9 @@ def upload_file():
         return jsonify({
             "error": "Something went wrong while processing the document."
         }), 500
+
+    # Re-uploading a document replaces it, so drop older copies on disk too.
+    remove_stored_files(upload_folder, filename, keep=stored_name)
 
     return jsonify({
         "message": "File uploaded, chunked, embedded, and stored in ChromaDB successfully",

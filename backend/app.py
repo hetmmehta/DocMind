@@ -6,6 +6,7 @@ from flask_cors import CORS
 import config
 from routes.upload_routes import upload_bp
 from routes.chat_routes import chat_bp
+from routes.document_routes import document_bp
 
 logging.basicConfig(
     level=logging.INFO,
@@ -26,6 +27,7 @@ def create_app(overrides=None):
 
     app.register_blueprint(upload_bp)
     app.register_blueprint(chat_bp)
+    app.register_blueprint(document_bp)
 
     @app.route("/", methods=["GET"])
     def home():
