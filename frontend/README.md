@@ -1,8 +1,11 @@
-# React + Vite
+# DocMind frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + Vite UI for DocMind: upload PDFs, see the ingested documents, and ask questions with cited sources.
 
-Currently, two official plugins are available:
+Setup, environment variables and the full project overview live in the [main README](../README.md).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+```bash
+cp .env.example .env   # set VITE_API_URL if the backend is not on http://localhost:5001
+npm install
+npm run dev
+```
