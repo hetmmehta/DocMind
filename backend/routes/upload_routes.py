@@ -1,13 +1,11 @@
 import os
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, current_app, request, jsonify
 
 from services.document_loader import load_pdf_text
 from services.chunking import chunk_pages
 from services.vector_store import add_chunks_to_vector_store
 
 upload_bp = Blueprint("upload", __name__)
-
-UPLOAD_FOLDER = "uploads"
 
 
 @upload_bp.route("/upload", methods=["POST"])
@@ -23,9 +21,10 @@ def upload_file():
     if not file.filename.lower().endswith(".pdf"):
         return jsonify({"error": "Only PDF files are supported right now"}), 400
 
-    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+    upload_folder = current_app.config["UPLOAD_FOLDER"]
+    os.makedirs(upload_folder, exist_ok=True)
 
-    file_path = os.path.join(UPLOAD_FOLDER, file.filename)
+    file_path = os.path.join(upload_folder, file.filename)
     file.save(file_path)
 
     pages = load_pdf_text(file_path)

@@ -1,10 +1,13 @@
 # Python
 backend/venv/
-backend/__pycache__/
+__pycache__/
+*.pyc
 backend/.pytest_cache/
 
 # Environment variables
 backend/.env
+frontend/.env
+frontend/.env.local
 
 # Uploaded files and local vector DB
 backend/uploads/

@@ -1,31 +1,37 @@
+import logging
+
 from flask import Blueprint, request, jsonify
+
+from services.errors import QUOTA_ERROR_MESSAGE, is_quota_error
 from services.rag_chain import ask_question
+
+logger = logging.getLogger(__name__)
 
 chat_bp = Blueprint("chat", __name__)
 
 
 @chat_bp.route("/chat", methods=["POST"])
 def chat():
-    data = request.get_json()
+    data = request.get_json(silent=True)
 
     if not data or "question" not in data:
         return jsonify({"error": "Question is required"}), 400
 
     question = data["question"]
 
+    if not isinstance(question, str) or not question.strip():
+        return jsonify({"error": "Question is required"}), 400
+
     try:
-        result = ask_question(question)
+        result = ask_question(question.strip())
         return jsonify(result)
 
     except Exception as e:
-        error_message = str(e)
+        if is_quota_error(e):
+            logger.warning("Gemini quota exceeded while answering a question: %s", e)
+            return jsonify({"error": QUOTA_ERROR_MESSAGE}), 429
 
-        if "429" in error_message or "quota" in error_message.lower() or "ResourceExhausted" in error_message:
-            return jsonify({
-                "error": "Gemini API quota exceeded. Please try again later or switch to another available model/API key."
-            }), 429
-
+        logger.exception("Failed to generate an answer")
         return jsonify({
-            "error": "Something went wrong while generating the answer.",
-            "details": error_message
+            "error": "Something went wrong while generating the answer."
         }), 500

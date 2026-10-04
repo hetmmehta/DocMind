@@ -1,10 +1,7 @@
 import os
-from dotenv import load_dotenv
 
 from langchain_google_genai import ChatGoogleGenerativeAI
 from services.vector_store import get_vector_store
-
-load_dotenv()
 
 
 def ask_question(question):

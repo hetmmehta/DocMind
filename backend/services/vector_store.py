@@ -1,13 +1,11 @@
 import os
-from dotenv import load_dotenv
 
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_chroma import Chroma
 from langchain_core.documents import Document
 
-load_dotenv()
+from config import CHROMA_DB_DIR
 
-CHROMA_DB_DIR = "chroma_db"
 COLLECTION_NAME = "docmind_collection"
 
 
