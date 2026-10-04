@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 
-const API_BASE_URL = "http://localhost:5001";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
 function App() {
   const [file, setFile] = useState(null);
@@ -11,6 +11,48 @@ function App() {
   const [sources, setSources] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
   const [isAsking, setIsAsking] = useState(false);
+  const [documents, setDocuments] = useState([]);
+  const [selectedDocument, setSelectedDocument] = useState("");
+
+  const loadDocuments = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/documents`);
+      const data = await response.json();
+
+      if (response.ok) {
+        setDocuments(data.documents || []);
+      }
+    } catch {
+      // The backend may not be running yet; the upload/ask flows show their own errors.
+    }
+  };
+
+  useEffect(() => {
+    loadDocuments();
+  }, []);
+
+  const handleDelete = async (filename) => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/documents/${encodeURIComponent(filename)}`,
+        { method: "DELETE" }
+      );
+      const data = await response.json();
+
+      if (!response.ok) {
+        setUploadStatus(data.error || "Delete failed.");
+        return;
+      }
+
+      if (selectedDocument === filename) {
+        setSelectedDocument("");
+      }
+      setUploadStatus(`${filename} removed.`);
+      loadDocuments();
+    } catch {
+      setUploadStatus("Could not connect to backend.");
+    }
+  };
 
   const handleUpload = async () => {
     if (!file) {
@@ -40,7 +82,8 @@ function App() {
       setUploadStatus(
         `${data.filename} uploaded successfully. ${data.chunks_stored} chunks stored.`
       );
-    } catch (error) {
+      loadDocuments();
+    } catch {
       setUploadStatus("Could not connect to backend.");
     } finally {
       setIsUploading(false);
@@ -63,7 +106,10 @@ function App() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ question }),
+        body: JSON.stringify({
+          question,
+          document: selectedDocument || undefined,
+        }),
       });
 
       const data = await response.json();
@@ -75,7 +121,7 @@ function App() {
 
       setAnswer(data.answer);
       setSources(data.sources || []);
-    } catch (error) {
+    } catch {
       setAnswer("Could not connect to backend.");
     } finally {
       setIsAsking(false);
@@ -106,10 +152,43 @@ function App() {
             </button>
           </div>
           {uploadStatus && <p className="status">{uploadStatus}</p>}
+
+          {documents.length > 0 && (
+            <ul className="document-list">
+              {documents.map((doc) => (
+                <li key={doc.filename}>
+                  <span>
+                    <strong>{doc.filename}</strong> · {doc.pages} pages ·{" "}
+                    {doc.chunks} chunks
+                  </span>
+                  <button
+                    className="link-button"
+                    onClick={() => handleDelete(doc.filename)}
+                  >
+                    Remove
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
 
         <section className="card">
           <h2>2. Ask a Question</h2>
+          {documents.length > 1 && (
+            <select
+              className="document-select"
+              value={selectedDocument}
+              onChange={(e) => setSelectedDocument(e.target.value)}
+            >
+              <option value="">Search all documents</option>
+              {documents.map((doc) => (
+                <option key={doc.filename} value={doc.filename}>
+                  Only {doc.filename}
+                </option>
+              ))}
+            </select>
+          )}
           <textarea
             placeholder="Example: What projects has Het worked on?"
             value={question}

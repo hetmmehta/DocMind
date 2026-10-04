@@ -132,3 +132,38 @@ button:disabled {
   color: #5f6b7a;
   line-height: 1.5;
 }
+.document-list {
+  list-style: none;
+  padding: 0;
+  margin: 18px 0 0;
+}
+
+.document-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid #e8ecf5;
+  color: #5f6b7a;
+}
+
+.document-list strong {
+  color: #172033;
+}
+
+.link-button {
+  background: none;
+  color: #4f46e5;
+  padding: 4px 8px;
+}
+
+.document-select {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 14px;
+  border-radius: 12px;
+  border: 1px solid #cfd7e6;
+  font-size: 15px;
+  background: white;
+}
